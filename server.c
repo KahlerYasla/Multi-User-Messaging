@@ -5,8 +5,12 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <sys/types.h>
+#include <time.h>
 #include <sys/stat.h>
+
+// my header files
 #include "ansiTerminalColors.h"
+
 //=================================================================================================
 #define MAX_MESSAGE_LENGTH 256
 //=================================================================================================
@@ -22,6 +26,7 @@ typedef struct Date
 //-------------------------------------------------------------------------------------------------
 typedef struct Message
 {
+    int messageID;
     char senderID[15];
     char receiverID[15];
     char body[MAX_MESSAGE_LENGTH];
@@ -43,13 +48,17 @@ void listContacts(char *userID, int client_socket);
 void addUser(char *userID, Message message, int client_socket);
 void deleteUser(char *userID, Message message, int client_socket);
 void createCSVIfNotExists(char *userID);
+void sortTheCSVFileAccordingToDate(char *messagesCSVPath);
+int compareDates(const Date *date1, const Date *date2);
 
 // Message functions
 void sendMessage(char *userID, Message message, int client_socket);
-void checkMessagesRequest(char *userID, int client_socket);
+void checkMessages(char *userID, int client_socket);
 //=================================================================================================
 int main()
 {
+    srand(time(NULL));
+
     // Server socket variables
     int server_socket, client_socket;
     struct sockaddr_in server_address, client_address;
@@ -164,7 +173,7 @@ void *handle_client_messages(void *arg) // function to handle client messages
             break;
         case 5:
             // Check messages from the server
-            checkMessagesRequest(userID, client_socket);
+            checkMessages(userID, client_socket);
             break;
         default:
             send(client_socket, "Invalid input!", sizeof("Invalid input!"), 0);
@@ -172,16 +181,15 @@ void *handle_client_messages(void *arg) // function to handle client messages
         }
 
         // Log the message to the server console
-        printf("%d %d %d:%d Received message from user %s to user %s: %s\n",
-               message.date.month, message.date.day, message.date.hour,
-               message.date.minute, message.senderID, message.receiverID, message.body);
-
-        // Close the client socket and terminate the thread
-        close(client_socket);
-        pthread_exit(NULL);
-
-        return NULL;
+        printf("%d/%d/%d %d:%d >> from %s to %s message is: %s\n",
+               message.date.day, message.date.month, message.date.year,
+               message.date.hour, message.date.minute,
+               message.senderID, message.receiverID, message.body);
     }
+
+    // Close the client socket and terminate the thread
+    close(client_socket);
+    pthread_exit(NULL);
 }
 //-------------------------------------------------------------------------------------------------
 void getCurrentDateAndTime(Date *date)
@@ -206,24 +214,31 @@ void listContacts(char *userID, int client_socket) // function to list contacts
     strcat(contactsCSVPath, ".csv");
     FILE *contactsCSV = fopen(contactsCSVPath, "r");
 
+    // Create message
+    Message message;
+    strcpy(message.senderID, "Server");
+    strcpy(message.receiverID, userID);
+
     // Send contacts to the client
     char contact[50];
     while (fgets(contact, sizeof(contact), contactsCSV))
     {
-        send(client_socket, contact, sizeof(contact), 0);
+        strcat(message.body, contact);
     }
 
-    // Send end of contacts to the client
-    send(client_socket, "end", sizeof("end"), 0);
+    send(client_socket, &message, sizeof(message), 0);
 
     fclose(contactsCSV);
 }
 //-------------------------------------------------------------------------------------------------
-void addUser(char *userID, Message message, int client_socket) // function to add user to contacts
+void addUser(char *userID, Message message, int client_socket)
 {
-    // Get user ID from the message
-    char userToAddID[15];
-    strcpy(userToAddID, message.body);
+    // Extract user details from the message body
+    char phoneNumber[12];
+    char name[50];
+    char surname[50];
+
+    sscanf(message.body, "2,%[^,],%[^,],%[^,]", phoneNumber, name, surname);
 
     // Open contacts CSV file
     char contactsCSVPath[50];
@@ -233,12 +248,18 @@ void addUser(char *userID, Message message, int client_socket) // function to ad
     FILE *contactsCSV = fopen(contactsCSVPath, "a");
 
     // Add user to contacts CSV file
-    fprintf(contactsCSV, "%s\n", userToAddID);
+    fprintf(contactsCSV, "%s,%s,%s\n", phoneNumber, name, surname);
 
     fclose(contactsCSV);
 
-    // Send message to the client
-    send(client_socket, "User added!", sizeof("User added!"), 0);
+    // Create response message
+    Message responseMessage;
+    strcpy(responseMessage.senderID, "Server");
+    strcpy(responseMessage.receiverID, userID);
+    strcpy(responseMessage.body, "User added!");
+
+    // Send response message to the client
+    send(client_socket, &responseMessage, sizeof(responseMessage), 0);
 }
 //-------------------------------------------------------------------------------------------------
 void deleteUser(char *userID, Message message, int client_socket) // function to delete user from contacts
@@ -278,8 +299,14 @@ void deleteUser(char *userID, Message message, int client_socket) // function to
     // Rename temporary CSV file to contacts CSV file
     rename(tempCSVPath, contactsCSVPath);
 
+    // Create message
+    Message newMessage;
+    strcpy(newMessage.senderID, "Server");
+    strcpy(newMessage.receiverID, userID);
+    strcpy(newMessage.body, "User deleted!");
+
     // Send message to the client
-    send(client_socket, "User deleted!", sizeof("User deleted!"), 0);
+    send(client_socket, &newMessage, sizeof(newMessage), 0);
 }
 //-------------------------------------------------------------------------------------------------
 // Function to send messages to the client (actually it just saves the message to the receiver's messages CSV file so called messagebox)
@@ -293,11 +320,23 @@ void sendMessage(char *userID, Message message, int client_socket) // function t
     char messageBody[256];
     strcpy(messageBody, message.body);
 
+    // delete the first character from the message body
+    for (int i = 0; i < strlen(messageBody); i++)
+    {
+        messageBody[i] = messageBody[i + 1];
+    }
+
     // Create message
     Message newMessage;
     strcpy(newMessage.senderID, userID);
     strcpy(newMessage.receiverID, receiverID);
     strcpy(newMessage.body, messageBody);
+
+    // Get current date and time
+    getCurrentDateAndTime(&newMessage.date);
+
+    // Create a ID for the message
+    newMessage.messageID = rand() % 10000;
 
     // Save message to the receiver's messages CSV file
     char messagesCSVPath[50];
@@ -306,36 +345,122 @@ void sendMessage(char *userID, Message message, int client_socket) // function t
     strcat(messagesCSVPath, ".csv");
     FILE *messagesCSV = fopen(messagesCSVPath, "a");
 
-    fprintf(messagesCSV, "%s,%s,%s,%d,%d,%d,%d,%d,%d\n", newMessage.senderID, newMessage.receiverID, newMessage.body,
+    fprintf(messagesCSV, "%d,%s,%s,%s,%d,%d,%d,%d,%d,%d\n",
+            newMessage.messageID,
+            newMessage.senderID, newMessage.receiverID, newMessage.body,
             newMessage.date.day, newMessage.date.month, newMessage.date.year,
             newMessage.date.hour, newMessage.date.minute, newMessage.date.second);
 
     fclose(messagesCSV);
 
+    // Create message
+    Message responseMessage;
+    strcpy(responseMessage.senderID, "Server");
+    strcpy(responseMessage.receiverID, userID);
+    strcpy(responseMessage.body, "Message sent!");
+
     // Send message to the client
-    send(client_socket, "Message sent!", sizeof("Message sent!"), 0);
+    send(client_socket, &responseMessage, sizeof(responseMessage), 0);
 }
 //-------------------------------------------------------------------------------------------------
-void checkMessagesRequest(char *userID, int client_socket) // function to check messages
+void checkMessages(char *userID, int client_socket) // function to check messages
 {
     // Open messages CSV file
     char messagesCSVPath[50];
     strcpy(messagesCSVPath, "Messages/");
     strcat(messagesCSVPath, userID);
     strcat(messagesCSVPath, ".csv");
+
+    sortTheCSVFileAccordingToDate(messagesCSVPath);
+
     FILE *messagesCSV = fopen(messagesCSVPath, "r");
 
+    // Create message
+    Message message;
+    strcpy(message.senderID, "Server");
+    strcpy(message.receiverID, userID);
+
     // Send messages to the client
-    char message[256];
-    while (fgets(message, sizeof(message), messagesCSV))
+    char messageBuffer[256];
+    while (fgets(messageBuffer, sizeof(message), messagesCSV))
     {
-        send(client_socket, message, sizeof(message), 0);
+        strcat(message.body, messageBuffer);
+        strcat(message.body, "\n");
     }
 
-    // Send end of messages to the client
-    send(client_socket, "end", sizeof("end"), 0);
+    send(client_socket, &message, sizeof(message), 0);
 
     fclose(messagesCSV);
+}
+//-------------------------------------------------------------------------------------------------
+void sortTheCSVFileAccordingToDate(char *messagesCSVPath)
+{
+    // Open messages CSV file
+    FILE *messagesCSV = fopen(messagesCSVPath, "r");
+    if (!messagesCSV)
+    {
+        perror("Error opening messages CSV file");
+        return;
+    }
+
+    // Read messages into an array
+    Message messages[100]; // Assuming a maximum of 100 messages
+    int messageCount = 0;
+    while (fread(&messages[messageCount], sizeof(Message), 1, messagesCSV) == 1)
+    {
+        messageCount++;
+    }
+
+    // Bubble sort messages based on date
+    for (int i = 0; i < messageCount - 1; i++)
+    {
+        for (int j = 0; j < messageCount - i - 1; j++)
+        {
+            if (compareDates(&messages[j].date, &messages[j + 1].date) > 0)
+            {
+                // Swap messages
+                Message temp = messages[j];
+                messages[j] = messages[j + 1];
+                messages[j + 1] = temp;
+            }
+        }
+    }
+
+    // Close the file
+    fclose(messagesCSV);
+
+    // Reopen the file for writing
+    messagesCSV = fopen(messagesCSVPath, "w");
+    if (!messagesCSV)
+    {
+        perror("Error opening messages CSV file for writing");
+        return;
+    }
+
+    // Write sorted messages back to the file
+    for (int i = 0; i < messageCount; i++)
+    {
+        fwrite(&messages[i], sizeof(Message), 1, messagesCSV);
+    }
+
+    // Close the file
+    fclose(messagesCSV);
+}
+//-------------------------------------------------------------------------------------------------
+// Function to compare two dates
+int compareDates(const Date *date1, const Date *date2)
+{
+    if (date1->year != date2->year)
+        return date1->year - date2->year;
+    if (date1->month != date2->month)
+        return date1->month - date2->month;
+    if (date1->day != date2->day)
+        return date1->day - date2->day;
+    if (date1->hour != date2->hour)
+        return date1->hour - date2->hour;
+    if (date1->minute != date2->minute)
+        return date1->minute - date2->minute;
+    return date1->second - date2->second;
 }
 //=================================================================================================
 // CSV file functions
@@ -372,8 +497,5 @@ void createCSVIfNotExists(char *userID) // function to create contacts and messa
     strcat(messagesCSVPath, ".csv");
     FILE *messagesCSV = fopen(messagesCSVPath, "a");
     fclose(messagesCSV);
-
-    // Log the message to the server console
-    printf("Created contacts and messages CSV files if they didn't exist\n");
 }
 //-------------------------------------------------------------------------------------------------
