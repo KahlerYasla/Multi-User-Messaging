@@ -54,9 +54,14 @@ int compareDates(const Date *date1, const Date *date2);
 // Message functions
 void sendMessage(char *userID, Message message, int client_socket);
 void checkMessages(char *userID, int client_socket);
+void listMessagesFromUser(char *userID, Message message, int client_socket);
+void deleteMessage(char *userID, Message message, int client_socket);
 //=================================================================================================
 int main()
 {
+    LogGreen("\n***** Multi-User-Messaging Server *****");
+    printf("\n=============================================================\n");
+
     srand(time(NULL));
 
     // Server socket variables
@@ -79,7 +84,7 @@ int main()
     // Bind the socket
     if (bind(server_socket, (struct sockaddr *)&server_address, sizeof(server_address)) == -1)
     {
-        perror("Socket bind failed");
+        LogRed("Socket bind failed on port 8080 (Maybe another server is running on the same port)\n");
         exit(EXIT_FAILURE);
     }
 
@@ -175,13 +180,21 @@ void *handle_client_messages(void *arg) // function to handle client messages
             // Check messages from the server
             checkMessages(userID, client_socket);
             break;
+        case 6:
+            // List messages from the specified user
+            listMessagesFromUser(userID, message, client_socket);
+            break;
+        case 7:
+            // Delete message from the specified user
+            deleteMessage(userID, message, client_socket);
+            break;
         default:
             send(client_socket, "Invalid input!", sizeof("Invalid input!"), 0);
             break;
         }
 
         // Log the message to the server console
-        printf("%d/%d/%d %d:%d >> from %s to %s message is: %s\n",
+        printf("%d/%d/%d %d:%d >> from %s to %s message is >> %s\n",
                message.date.day, message.date.month, message.date.year,
                message.date.hour, message.date.minute,
                message.senderID, message.receiverID, message.body);
@@ -216,6 +229,10 @@ void listContacts(char *userID, int client_socket) // function to list contacts
 
     // Create message
     Message message;
+
+    // Clear the message body
+    strcpy(message.body, "Listing the Contacts:\n(Phone Number, Name, Surname)\n\n");
+
     strcpy(message.senderID, "Server");
     strcpy(message.receiverID, userID);
 
@@ -226,9 +243,213 @@ void listContacts(char *userID, int client_socket) // function to list contacts
         strcat(message.body, contact);
     }
 
+    // Remove the last "\n" character
+    message.body[strlen(message.body) - 1] = '\0';
+
     send(client_socket, &message, sizeof(message), 0);
 
     fclose(contactsCSV);
+}
+//-------------------------------------------------------------------------------------------------
+void listMessagesFromUser(char *userID, Message message, int client_socket)
+{
+    // Extract the specified userID from message
+    char specifiedUserID[15];
+    strcpy(specifiedUserID, message.body);
+
+    // Delete the first 2 character from the user ID
+    for (int i = 0; i < strlen(specifiedUserID); i++)
+    {
+        specifiedUserID[i] = specifiedUserID[i + 2];
+    }
+
+    // Open messages CSV file
+    char messagesCSVPath[50];
+    strcpy(messagesCSVPath, "Messages/");
+    strcat(messagesCSVPath, userID);
+    strcat(messagesCSVPath, ".csv");
+    FILE *messagesCSV = fopen(messagesCSVPath, "r");
+
+    // Create message
+    Message newMessage;
+
+    // Clear the message body
+    strcpy(newMessage.body, "");
+
+    strcpy(newMessage.senderID, "Server");
+    strcpy(newMessage.receiverID, userID);
+
+    // Send messages to the client
+    char messageBuffer[256];
+    char **token = malloc(10 * sizeof(char *));
+    int isFound = 0;
+
+    strcat(newMessage.body, "\nListing the Messages From User:\n");
+    strcat(newMessage.body, specifiedUserID);
+    strcat(newMessage.body, "\nFrom Who ~~> The Message\n(ID DD,MM,YYYY Hour:Minute)  \n\n");
+
+    while (fgets(messageBuffer, sizeof(messageBuffer), messagesCSV))
+    {
+        // Divide messageBuffer from "," characters
+        token[0] = strtok(messageBuffer, ",");
+
+        int i = 1;
+        while (token[i - 1] != NULL)
+        {
+            // Get the next token
+            token[i] = strtok(NULL, ",");
+
+            i++;
+        }
+
+        // If the message is from the specified user, send it to the client
+        if (strcmp(token[1], specifiedUserID) == 0)
+        {
+            strcat(newMessage.body, token[1]);
+            strcat(newMessage.body, " ~~> ");
+
+            strcat(newMessage.body, token[3]);
+
+            strcat(newMessage.body, "\n");
+
+            strcat(newMessage.body, token[0]);
+            strcat(newMessage.body, " ");
+
+            strcat(newMessage.body, token[4]);
+            strcat(newMessage.body, "/");
+            strcat(newMessage.body, token[5]);
+            strcat(newMessage.body, "/");
+            strcat(newMessage.body, token[6]);
+
+            strcat(newMessage.body, " ");
+            strcat(newMessage.body, token[7]);
+            strcat(newMessage.body, ":");
+            strcat(newMessage.body, token[8]);
+
+            strcat(newMessage.body, "\n\n");
+
+            isFound = 1;
+        }
+    }
+
+    // Remove the last 2 "\n" character
+    if (strlen(newMessage.body) > 3)
+    {
+        newMessage.body[strlen(newMessage.body) - 1] = '\0';
+        newMessage.body[strlen(newMessage.body) - 2] = '\0';
+    }
+
+    if (!isFound)
+    {
+        strcpy(newMessage.body, "No message found from the specified user!");
+    }
+
+    send(client_socket, &newMessage, sizeof(newMessage), 0);
+
+    fclose(messagesCSV);
+}
+//-------------------------------------------------------------------------------------------------
+void deleteMessage(char *userID, Message message, int client_socket)
+{
+    // Extract the specified messageID from message
+    char specifiedMessageID[10];
+    strcpy(specifiedMessageID, message.body);
+
+    // Delete the first 2 character from the message ID
+    for (int i = 0; i < strlen(specifiedMessageID); i++)
+    {
+        specifiedMessageID[i] = specifiedMessageID[i + 2];
+    }
+
+    // Open messages CSV file
+    char messagesCSVPath[50];
+    strcpy(messagesCSVPath, "Messages/");
+    strcat(messagesCSVPath, userID);
+    strcat(messagesCSVPath, ".csv");
+    FILE *messagesCSV = fopen(messagesCSVPath, "r");
+
+    // Open a temporary CSV file
+    char tempCSVPath[50];
+    strcpy(tempCSVPath, "Messages/temp.csv");
+    FILE *tempCSV = fopen(tempCSVPath, "w");
+
+    int isDeleted = 0;
+
+    LogGreen("=============================================================\n");
+    LogGreen("Controlling messages one by one:\n");
+    // Copy all messages except the one to be deleted to the temporary CSV file
+    char messageBuffer[256];
+    while (fgets(messageBuffer, sizeof(messageBuffer), messagesCSV))
+    {
+        // Set the message first string before first "," character
+        char messageID[10];
+
+        // Clear the messageID
+        memset(messageID, 0, sizeof(messageID));
+
+        int i = 0;
+        while (messageBuffer[i] != ',')
+        {
+            messageID[i] = messageBuffer[i];
+            i++;
+        }
+
+        printf("Controlling message's ID: %s\n", messageID);
+
+        // If the message is not the one to be deleted, copy it to the temporary CSV file
+        if (strcmp(messageID, specifiedMessageID) != 0)
+        {
+            fprintf(tempCSV, "%s", messageBuffer);
+        }
+        else
+        {
+            LogMagenta("Message found and deleted\n");
+            isDeleted = 1;
+        }
+
+        // Clear the messageBuffer
+        memset(messageBuffer, 0, sizeof(messageBuffer));
+    }
+
+    LogGreen("=============================================================\n");
+
+    // Close the files
+    fclose(messagesCSV);
+    fclose(tempCSV);
+
+    // Delete the messages CSV file
+    remove(messagesCSVPath);
+
+    // Rename the temporary CSV file to messages CSV file
+    rename(tempCSVPath, messagesCSVPath);
+
+    // Create message
+    Message newMessage;
+
+    // Clear the message body
+    strcpy(newMessage.body, "");
+
+    strcpy(newMessage.senderID, "Server");
+
+    if (isDeleted)
+    {
+        strcpy(newMessage.receiverID, userID);
+        strcpy(newMessage.body, "Message deleted!");
+    }
+    else
+    {
+        strcpy(newMessage.receiverID, userID);
+        strcpy(newMessage.body, "Message not found!");
+    }
+
+    // Send message to the client
+    send(client_socket, &newMessage, sizeof(newMessage), 0);
+
+    // Clear the newMessage
+    memset(&newMessage, 0, sizeof(newMessage));
+
+    // Clear the message body
+    strcpy(newMessage.body, "");
 }
 //-------------------------------------------------------------------------------------------------
 void addUser(char *userID, Message message, int client_socket)
@@ -254,6 +475,10 @@ void addUser(char *userID, Message message, int client_socket)
 
     // Create response message
     Message responseMessage;
+
+    // Clear the message body
+    strcpy(responseMessage.body, "");
+
     strcpy(responseMessage.senderID, "Server");
     strcpy(responseMessage.receiverID, userID);
     strcpy(responseMessage.body, "User added!");
@@ -265,8 +490,14 @@ void addUser(char *userID, Message message, int client_socket)
 void deleteUser(char *userID, Message message, int client_socket) // function to delete user from contacts
 {
     // Get user ID from the message
-    char userToDeleteID[15];
-    strcpy(userToDeleteID, message.body);
+    char userPhoneNumberToDelete[20];
+    strcpy(userPhoneNumberToDelete, message.body);
+
+    // Delete the first 2 character from the user ID
+    for (int i = 0; i < strlen(userPhoneNumberToDelete); i++)
+    {
+        userPhoneNumberToDelete[i] = userPhoneNumberToDelete[i + 2];
+    }
 
     // Open contacts CSV file
     char contactsCSVPath[50];
@@ -275,35 +506,78 @@ void deleteUser(char *userID, Message message, int client_socket) // function to
     strcat(contactsCSVPath, ".csv");
     FILE *contactsCSV = fopen(contactsCSVPath, "r");
 
-    // Open temporary CSV file
+    // Open a temporary CSV file
     char tempCSVPath[50];
     strcpy(tempCSVPath, "Contacts/temp.csv");
     FILE *tempCSV = fopen(tempCSVPath, "w");
 
-    // Copy all contacts except the one to delete to the temporary CSV file
+    int isDeleted = 0;
+
+    LogGreen("=============================================================\n");
+    LogGreen("Controlling phones one by one:\n");
+    // Copy all contacts except the one to be deleted to the temporary CSV file
     char contact[50];
     while (fgets(contact, sizeof(contact), contactsCSV))
     {
-        if (strcmp(contact, userToDeleteID) != 0)
+        // Set the contact first string before first "," character
+        char contactPhoneNumber[20];
+
+        // Clear the contactPhoneNumber
+        memset(contactPhoneNumber, 0, sizeof(contactPhoneNumber));
+
+        int i = 0;
+        while (contact[i] != ',')
+        {
+            contactPhoneNumber[i] = contact[i];
+            i++;
+        }
+
+        printf("Controlling contact's phone number: %s\n", contactPhoneNumber);
+
+        // If the contact is not the one to be deleted, copy it to the temporary CSV file
+        if (strcmp(contactPhoneNumber, userPhoneNumberToDelete) != 0)
         {
             fprintf(tempCSV, "%s", contact);
         }
+        else
+        {
+            LogMagenta("Contact found and deleted\n");
+            isDeleted = 1;
+        }
+
+        // Clear the contact
+        memset(contact, 0, sizeof(contact));
     }
 
+    LogGreen("=============================================================\n");
+
+    // Close the files
     fclose(contactsCSV);
     fclose(tempCSV);
 
-    // Delete contacts CSV file
+    // Delete the contacts CSV file
     remove(contactsCSVPath);
 
-    // Rename temporary CSV file to contacts CSV file
+    // Rename the temporary CSV file to contacts CSV file
     rename(tempCSVPath, contactsCSVPath);
 
     // Create message
     Message newMessage;
+
+    // Clear the message body
+    strcpy(newMessage.body, "");
+
     strcpy(newMessage.senderID, "Server");
     strcpy(newMessage.receiverID, userID);
-    strcpy(newMessage.body, "User deleted!");
+
+    if (isDeleted)
+    {
+        strcpy(newMessage.body, "User deleted!");
+    }
+    else
+    {
+        strcpy(newMessage.body, "User not found in your contacts!");
+    }
 
     // Send message to the client
     send(client_socket, &newMessage, sizeof(newMessage), 0);
@@ -328,6 +602,10 @@ void sendMessage(char *userID, Message message, int client_socket) // function t
 
     // Create message
     Message newMessage;
+
+    // Clear the message body
+    strcpy(newMessage.body, "");
+
     strcpy(newMessage.senderID, userID);
     strcpy(newMessage.receiverID, receiverID);
     strcpy(newMessage.body, messageBody);
@@ -355,6 +633,10 @@ void sendMessage(char *userID, Message message, int client_socket) // function t
 
     // Create message
     Message responseMessage;
+
+    // Clear the message body
+    strcpy(responseMessage.body, "");
+
     strcpy(responseMessage.senderID, "Server");
     strcpy(responseMessage.receiverID, userID);
     strcpy(responseMessage.body, "Message sent!");
@@ -371,21 +653,68 @@ void checkMessages(char *userID, int client_socket) // function to check message
     strcat(messagesCSVPath, userID);
     strcat(messagesCSVPath, ".csv");
 
-    sortTheCSVFileAccordingToDate(messagesCSVPath);
+    // sortTheCSVFileAccordingToDate(messagesCSVPath);
 
     FILE *messagesCSV = fopen(messagesCSVPath, "r");
 
     // Create message
     Message message;
+
+    // Clear the message body
+    strcpy(message.body, "");
+
     strcpy(message.senderID, "Server");
     strcpy(message.receiverID, userID);
 
     // Send messages to the client
     char messageBuffer[256];
-    while (fgets(messageBuffer, sizeof(message), messagesCSV))
+    char **token = malloc(10 * sizeof(char *));
+
+    strcat(message.body, "\nFrom Who ~~> The Message\n(ID DD,MM,YYYY Hour:Minute)  \n\n");
+
+    while (fgets(messageBuffer, sizeof(messageBuffer), messagesCSV))
     {
-        strcat(message.body, messageBuffer);
+        // Divide messageBuffer from "," characters
+        token[0] = strtok(messageBuffer, ",");
+
+        int i = 1;
+        while (token[i - 1] != NULL)
+        {
+            // Get the next token
+            token[i] = strtok(NULL, ",");
+
+            i++;
+        }
+
+        strcat(message.body, token[1]);
+        strcat(message.body, " ~~> ");
+
+        strcat(message.body, token[3]);
+
         strcat(message.body, "\n");
+
+        strcat(message.body, token[0]);
+        strcat(message.body, " ");
+
+        strcat(message.body, token[4]);
+        strcat(message.body, "/");
+        strcat(message.body, token[5]);
+        strcat(message.body, "/");
+        strcat(message.body, token[6]);
+
+        strcat(message.body, " ");
+        strcat(message.body, token[7]);
+        strcat(message.body, ":");
+        strcat(message.body, token[8]);
+
+        strcat(message.body, "\n\n");
+    }
+
+    // Remove the last 2 "\n" character
+    if (strlen(message.body) > 3)
+    {
+        message.body[strlen(message.body) - 1] = '\0';
+        message.body[strlen(message.body) - 2] = '\0';
     }
 
     send(client_socket, &message, sizeof(message), 0);

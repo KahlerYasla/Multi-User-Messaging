@@ -10,6 +10,7 @@
 
 //-------------------------------------------------------------------------------------------------
 #define MAX_MESSAGE_LENGTH 256
+#define clrscr() system("clear||cls")
 //=================================================================================================
 typedef struct Message
 {
@@ -28,7 +29,11 @@ typedef struct User
 //=================================================================================================
 // Function templates
 void *listenForServer(void *arg);
+
+// Display Functions
 void display_menu();
+void displayCheckMessagesMenu(int client_socket);
+void clearTheTerminal(int isOnlyMenu);
 
 // CSV file functions
 void listContactsRequest(char *userID, int client_socket);
@@ -38,16 +43,23 @@ void deleteUserRequest(char *userID, int client_socket);
 // Socket functions
 void sendMessageRequest(char *userID, int client_socket);
 void checkMessagesRequest(char *userID, int client_socket);
+void listFromUserRequest(char *userID, int client_socket);
+void deleteMessageRequest(char *userID, int client_socket);
 //=================================================================================================
+char USER_ID[15];
 int main()
 {
+    LogCyan("\n***** Multi-User-Messaging Client *****\n");
+    printf("\n=============================================================\n");
+
     // Socket variables
     int client_socket;
 
     // Get user ID from the user
-    char userID[15];
     printf("Enter your user ID to start: ");
-    scanf("%s", userID);
+    scanf("%s", USER_ID);
+
+    clearTheTerminal(1);
 
     // Initialize client socket and other necessary variables
     struct sockaddr_in server_address;
@@ -72,7 +84,7 @@ int main()
     }
 
     // Send login request to the server
-    send(client_socket, userID, strlen(userID), 0);
+    send(client_socket, USER_ID, strlen(USER_ID), 0);
 
     // Create a thread for listening to messages
     pthread_t listener_thread;
@@ -89,29 +101,28 @@ int main()
         int userInput;
         scanf("%d", &userInput);
 
-        LogCyan("----------------------------------------");
-
         switch (userInput)
         {
         case 1:
             // List contacts from UserID.csv
-            listContactsRequest(userID, client_socket);
+            listContactsRequest(USER_ID, client_socket);
             break;
         case 2:
             // Add user to UserID.csv
-            addUserRequest(userID, client_socket);
+            addUserRequest(USER_ID, client_socket);
             break;
         case 3:
             // Delete user from UserID.csv
-            deleteUserRequest(userID, client_socket);
+            deleteUserRequest(USER_ID, client_socket);
             break;
         case 4:
             // Send message to the server
-            sendMessageRequest(userID, client_socket);
+            sendMessageRequest(USER_ID, client_socket);
             break;
         case 5:
             // Check messages from the server
-            checkMessagesRequest(userID, client_socket);
+            checkMessagesRequest(USER_ID, client_socket);
+            displayCheckMessagesMenu(client_socket);
             break;
         case 6:
             // Close the client socket
@@ -131,19 +142,26 @@ void *listenForServer(void *arg)
     int client_socket = *((int *)arg);
     int messageCount = 0;
 
+    // Receive messages from the server
+    struct Message message;
+
     while (1)
     {
-        // Receive messages from the server
-        struct Message message;
 
         if (recv(client_socket, &message, sizeof(message), 0) > 0)
         {
-            if (messageCount % 2 == 1)
+            if (messageCount % 2 == 0)
             {
+                // Clear the terminal
+                clearTheTerminal(0);
+
                 // Display message
-                LogCyan("\n-Server:\n");
+                LogCyan("Server:\n");
                 printf("%s\n", message.body);
             }
+
+            // Clear message body
+            memset(message.body, 0, sizeof(message.body));
 
             messageCount++;
         }
@@ -156,7 +174,8 @@ void *listenForServer(void *arg)
 // Function to display menu and handle user input
 void display_menu()
 {
-    LogCyan("========================================\n");
+    printf("=============================================================\n");
+    LogCyan("Menu:\n");
     printf("1. List Contacts\n");
     printf("2. Add User to Contacts\n");
     printf("3. Delete User from Contacts\n");
@@ -164,6 +183,55 @@ void display_menu()
     printf("5. Check Messages\n");
     printf("6. Exit\n");
     printf("Your choice: ");
+}
+//-------------------------------------------------------------------------------------------------
+void displayCheckMessagesMenu(int client_socket)
+{
+    sleep(1);
+
+    printf("=============================================================\n");
+    LogCyan("Check Messages Menu:\n");
+    printf("1. List Messagebox From Specific User\n");
+    printf("2. Delete a Message\n");
+    printf("3. Main Menu\n");
+    printf("Your choice: ");
+
+    int choice = 0;
+    scanf("%d", &choice);
+
+    switch (choice)
+    {
+    case 1:
+        // List from User
+        listFromUserRequest(USER_ID, client_socket);
+        break;
+    case 2:
+        // Delete a message
+        deleteMessageRequest(USER_ID, client_socket);
+        break;
+    default:
+        // Main Menu
+        clearTheTerminal(1);
+        break;
+    }
+}
+//-------------------------------------------------------------------------------------------------
+void clearTheTerminal(int isOnlyMenu)
+{
+    clrscr();
+    LogCyan("\n***** Multi-User-Messaging Client *****\n");
+    printf("---------------------------------------\n");
+    LogCyan("User Logged In: ");
+    printf("%s", USER_ID);
+
+    if (!isOnlyMenu)
+    {
+        printf("\n=============================================================\n");
+    }
+    else
+    {
+        printf("\n");
+    }
 }
 //=================================================================================================
 // Function to send message to the server
@@ -203,6 +271,8 @@ void checkMessagesRequest(char *userID, int client_socket)
 
     // Send message to the server
     send(client_socket, &message, sizeof(message), 0);
+
+    displayCheckMessagesMenu(client_socket);
 }
 //=================================================================================================
 // Function to list contacts from UserID.csv
@@ -218,6 +288,46 @@ void listContactsRequest(char *userID, int client_socket)
     send(client_socket, &message, sizeof(message), 0);
 }
 //-------------------------------------------------------------------------------------------------
+// Function to list messages from a specific user
+void listFromUserRequest(char *userID, int client_socket)
+{
+    // Get user ID from the user
+    char specifiedUserID[15];
+    printf("\nEnter user ID: ");
+    scanf("%s", specifiedUserID);
+
+    // Create message
+    Message message;
+    strcpy(message.senderID, USER_ID);
+    strcpy(message.receiverID, "Server");
+    strcpy(message.body, "7");
+    strcat(message.body, ",");
+    strcat(message.body, specifiedUserID);
+
+    // Send message to the server
+    send(client_socket, &message, sizeof(message), 0);
+}
+//-------------------------------------------------------------------------------------------------
+// Function to delete a message
+void deleteMessageRequest(char *userID, int client_socket)
+{
+    // Get message ID from the user
+    char messageID[10];
+    printf("\nEnter message ID: ");
+    scanf("%s", messageID);
+
+    // Create message
+    Message message;
+    strcpy(message.senderID, USER_ID);
+    strcpy(message.receiverID, "Server");
+    strcpy(message.body, "8");
+    strcat(message.body, ",");
+    strcat(message.body, messageID);
+
+    // Send message to the server
+    send(client_socket, &message, sizeof(message), 0);
+}
+//-------------------------------------------------------------------------------------------------
 // Function to add user to UserID.csv
 void addUserRequest(char *userID, int client_socket)
 {
@@ -225,7 +335,7 @@ void addUserRequest(char *userID, int client_socket)
     char phoneNumber[12];
     char name[50];
     char surname[50];
-    printf("Enter user details:\n");
+    printf("\nEnter user details:\n");
     printf("Phone number: ");
     scanf("%s", phoneNumber);
     printf("Name: ");
@@ -260,7 +370,7 @@ void deleteUserRequest(char *userID, int client_socket)
 {
     // Get user details from the user
     char phoneNumber[12];
-    printf("Enter user details:\n");
+    printf("\nEnter user details:\n");
     printf("Phone number: ");
     scanf("%s", phoneNumber);
 
