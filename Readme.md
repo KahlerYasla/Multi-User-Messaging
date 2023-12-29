@@ -99,36 +99,28 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 ---
 
-# Screenshots:
+# Screenshots
 
-![Screenshot 1](./Public/Project%20ScreenShots/0.png)
----
-![Screenshot 2](./Public/Project%20ScreenShots/1.png)
----
-![Screenshot 3](./Public/Project%20ScreenShots/2.png)
----
-![Screenshot 4](./Public/Project%20ScreenShots/3.png)
----
-![Screenshot 5](./Public/Project%20ScreenShots/4.png)
----
-![Screenshot 6](./Public/Project%20ScreenShots/5.png)
----
-![Screenshot 7](./Public/Project%20ScreenShots/6.png)
----
-![Screenshot 8](./Public/Project%20ScreenShots/7.png)
----
-![Screenshot 9](./Public/Project%20ScreenShots/8.png)
----
-![Screenshot 10](./Public/Project%20ScreenShots/9.png)
----
-![Screenshot 11](./Public/Project%20ScreenShots/10.png)
----
-![Screenshot 12](./Public/Project%20ScreenShots/11.png)
----
-![Screenshot 13](./Public/Project%20ScreenShots/12.png)
----
-![Screenshot 14](./Public/Project%20ScreenShots/13.png)
----
+| Screenshot 1                    | Screenshot 2                    | Screenshot 3                    |
+|----------------------------------|----------------------------------|----------------------------------|
+| ![Screenshot 1](./Public/Project%20ScreenShots/0.png) | ![Screenshot 2](./Public/Project%20ScreenShots/1.png) | ![Screenshot 3](./Public/Project%20ScreenShots/2.png) |
+
+| Screenshot 4                    | Screenshot 5                    | Screenshot 6                    |
+|----------------------------------|----------------------------------|----------------------------------|
+| ![Screenshot 4](./Public/Project%20ScreenShots/3.png) | ![Screenshot 5](./Public/Project%20ScreenShots/4.png) | ![Screenshot 6](./Public/Project%20ScreenShots/5.png) |
+
+| Screenshot 7                    | Screenshot 8                    | Screenshot 9                    |
+|----------------------------------|----------------------------------|----------------------------------|
+| ![Screenshot 7](./Public/Project%20ScreenShots/6.png) | ![Screenshot 8](./Public/Project%20ScreenShots/7.png) | ![Screenshot 9](./Public/Project%20ScreenShots/8.png) |
+
+| Screenshot 10                   | Screenshot 11                   | Screenshot 12                   |
+|----------------------------------|----------------------------------|----------------------------------|
+| ![Screenshot 10](./Public/Project%20ScreenShots/9.png) | ![Screenshot 11](./Public/Project%20ScreenShots/10.png) | ![Screenshot 12](./Public/Project%20ScreenShots/11.png) |
+
+| Screenshot 13                   | Screenshot 14                   |
+|----------------------------------|----------------------------------|
+| ![Screenshot 13](./Public/Project%20ScreenShots/12.png) | ![Screenshot 14](./Public/Project%20ScreenShots/13.png) |
+
 
 # Code Documentation
 
@@ -136,7 +128,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 #### Function Prototypes and Explanations:
 
-<details><summary>See more</summary>
+<details>
 ---
 1. Handler function for each client thread
 
@@ -312,7 +304,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 #### Function Prototypes and Explanations:
 
-<details><summary>See more</summary>
+<details>
 1. Function for displaying the menu
 
    ```c 
@@ -444,7 +436,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 #### Function Prototypes and Explanations:
 
-<details><summary>See more</summary>
+<details>
 0. Macro function for printing colored text to the console
 
    ```c 
@@ -459,5 +451,4 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
    > | Output | None |
 
 ---
-
 </details>
