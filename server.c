@@ -14,6 +14,20 @@
 //=================================================================================================
 #define MAX_MESSAGE_LENGTH 256
 //=================================================================================================
+/**
+ * @brief Represents a date and time.
+ *
+ * This structure stores the day, month, year, hour, minute, and second of a specific date and time.
+ */
+typedef struct Date
+{
+    int day;    /**< The day of the month (1-31). */
+    int month;  /**< The month of the year (1-12). */
+    int year;   /**< The year. */
+    int hour;   /**< The hour of the day (0-23). */
+    int minute; /**< The minute of the hour (0-59). */
+    int second; /**< The second of the minute (0-59). */
+} Date;
 typedef struct Date
 {
     int day;
