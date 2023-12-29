@@ -56,7 +56,7 @@ Frameworks and Technologies:
 
 # Project Structure:
 
-```bash
+```html
 .
 ├── Contacts
 │   ├── userID.csv // example
