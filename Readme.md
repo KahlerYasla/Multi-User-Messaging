@@ -137,7 +137,6 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 #### Function Prototypes and Explanations:
 
 <details>
----
 
 1. Handler function for each client thread
 
