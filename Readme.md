@@ -3,7 +3,7 @@
  
 ![Featured Photo](./Public/Project%20ScreenShots/12.png)
 
-# Table of Contents:
+# List of Contents:
 - [Project Description](#project-description)
    - [Built With](#built-with)
    - [Libraries and Dependencies](#libraries-and-dependencies)
@@ -13,25 +13,27 @@
 - [Future Improvements](#future-improvements)
 - [Screenshots](#screenshots)
 - [Code Documentation](#code-documentation)
-  - [Server Component](#server-component)
+  - [server.c](#serverc)
     - [Function Prototypes and Explanations](#function-prototypes-and-explanations)
-  - [Client Component](#client-component)
+  - [client.c](#clientc)
     - [Function Prototypes and Explanations](#function-prototypes-and-explanations-1)
+   - [ansiTerminalColors.h](#ansiterminalcolorsh)
+      - [Function Prototypes and Explanations](#function-prototypes-and-explanations-2)
 
 ---
 # Project Description:
->Multi-threaded **`console`** chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
+Multi-threaded **`console`** chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
 
 #### Built With:
-```diff
+
 Programming Languages:
-+ C
+- C
 
 Frameworks and Technologies:
 - No frameworks used (only standard libraries)
-+ Only C standard libraries for Unix-like systems
-+ Csv file system for storing messages and contacts
-   ```
+- Only C standard libraries for Unix-like systems
+- Csv file system for storing messages and contacts
+
 
 #### Libraries and Dependencies:
 
@@ -50,7 +52,9 @@ Frameworks and Technologies:
 #### Compatible with:
 ```diff
 + Linux
+
 + MacOS
+
 - Windows (needs to include winsock.h instead of arpa/inet.h)
 ```
 
@@ -63,7 +67,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 # Project Structure:
 
-```html
+```console
 .
 ├── Contacts
 │   ├── userID.csv // example
@@ -89,6 +93,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 # Future Improvements:
 ```diff
 + Add a proper database instead of CSV files (maybe SQLite or PostgreSQL)
+
 + Add a decent GUI (maybe with Qt)
 ```
 
@@ -127,12 +132,13 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 # Code Documentation
 
-## Server Component:
+## server.c
 
-### Function Prototypes and Explanations:
+#### Function Prototypes and Explanations:
 
+<details><summary>See more</summary>
 ---
-1. handler function for each client thread
+1. Handler function for each client thread
 
    ```c 
    void *handleClient(void *arg)
@@ -160,120 +166,298 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 ---
 
-3. **`void listContacts(char *userID, int client_socket)`**
+3. Response function for listing contacts
 
-   - **Inputs:** `char *userID`, `int client_socket`
-   - **Outputs:** Sends a list of contacts to the client
-   - **Explanation:** Reads the user's contacts from a CSV file and sends them to the client.
+   ```c 
+   void listContacts(char *userID, int client_socket)
+   ```
+   > This function reads the user's contacts from a CSV file and sends them to the client.
 
-4. **`void listMessagesFromUser(char *userID, Message message, int client_socket)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, int client_socket |
+   > | Output | Sends a list of contacts to the client |
 
-   - **Inputs:** `char *userID`, `Message message`, `int client_socket`
-   - **Outputs:** Sends messages from a specified user to the client
-   - **Explanation:** Reads messages from a CSV file, filters them based on the specified user, and sends the result to the client.
+---
 
-5. **`void deleteMessage(char *userID, Message message, int client_socket)`**
+4. Response function for listing messages from a user
 
-   - **Inputs:** `char *userID`, `Message message`, `int client_socket`
-   - **Outputs:** Sends a confirmation or error message to the client
-   - **Explanation:** Deletes a specified message from the user's message history and sends a confirmation or error message to the client.
+   ```c 
+   void listMessagesFromUser(char *userID, Message message, int client_socket)
+   ```
+   > This function reads messages from a CSV file, filters them based on the specified user, and sends the result to the client.
 
-6. **`void addUser(char *userID, Message message, int client_socket)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, Message message, int client_socket |
+   > | Output | Sends messages from a specified user to the client |
 
-   - **Inputs:** `char *userID`, `Message message`, `int client_socket`
-   - **Outputs:** Sends a confirmation message to the client
-   - **Explanation:** Adds a user to the contact list and sends a confirmation message to the client.
+---
 
-7. **`void deleteUser(char *userID, Message message, int client_socket)`**
+5. Response function for deleting a message
 
-   - **Inputs:** `char *userID`, `Message message`, `int client_socket`
-   - **Outputs:** Sends a confirmation or error message to the client
-   - **Explanation:** Deletes a specified user from the contact list and sends a confirmation or error message to the client.
+   ```c 
+   void deleteMessage(char *userID, Message message, int client_socket)
+   ```
+   > This function deletes a specified message from the user's message history and sends a confirmation or error message to the client.
 
-8. **`void sendMessage(char *userID, Message message, int client_socket)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, Message message, int client_socket |
+   > | Output | Sends a confirmation or error message to the client |
 
-   - **Inputs:** `char *userID`, `Message message`, `int client_socket`
-   - **Outputs:** Sends a confirmation message to the client
-   - **Explanation:** Sends a message from the user to another user, updating the recipient's message history.
+---
 
-9. **`void checkMessages(char *userID, int client_socket)`**
+6. Response function for adding a user
 
-   - **Inputs:** `char *userID`, `int client_socket`
-   - **Outputs:** Sends a list of messages to the client
-   - **Explanation:** Reads the user's messages from a CSV file and sends them to the client.
+   ```c 
+   void addUser(char *userID, Message message, int client_socket)
+   ```
+   > This function adds a user to the contact list and sends a confirmation message to the client.
 
-10. **`void sortTheCSVFileAccordingToDate(char *messagesCSVPath)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, Message message, int client_socket |
+   > | Output | Sends a confirmation message to the client |
 
-    - **Inputs:** `char *messagesCSVPath`
-    - **Outputs:** None
-    - **Explanation:** Sorts the messages in a CSV file based on their dates.
+---
 
-11. **`int compareDates(const Date *date1, const Date *date2)`**
+7. Response function for deleting a user
 
-    - **Inputs:** `const Date *date1`, `const Date *date2`
-    - **Outputs:** Returns an integer (comparison result)
-    - **Explanation:** Compares two date structures and returns the result.
+   ```c 
+   void deleteUser(char *userID, Message message, int client_socket)
+   ```
+   > This function deletes a specified user from the contact list and sends a confirmation or error message to the client.
 
-12. **`void createCSVIfNotExists(char *userID)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, Message message, int client_socket |
+   > | Output | Sends a confirmation or error message to the client |
 
-    - **Inputs:** `char *userID`
-    - **Outputs:** None
-    - **Explanation:** Creates contacts and messages CSV files if they don't exist for the given user.
+---
 
-## Client Component:
+8. Response function for sending a message
 
-### Function Prototypes and Explanations:
+   ```c 
+   void sendMessage(char *userID, Message message, int client_socket)
+   ```
+   > This function sends a message from the user to another user, updating the recipient's message history.
 
-1. **`void displayMenu()`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, Message message, int client_socket |
+   > | Output | Sends a confirmation message to the client |
 
-   - **Inputs:** None
-   - **Outputs:** None
-   - **Explanation:** Displays the menu options for the user.
+---
 
-2. **`void sendMessageToServer(int client_socket, char *userID)`**
+9. Response function for checking messages
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Sends a message to the server
-   - **Explanation:** Takes user input for sending a message, constructs a `Message` structure, and sends it to the server.
+   ```c 
+   void checkMessages(char *userID, int client_socket)
+   ```
+   > This function reads the user's messages from a CSV file and sends them to the client.
 
-3. **`void receiveMessagesFromServer(int client_socket, char *userID)`**
+   > |  |  |
+   > | - | - |
+   > | Input | char *userID, int client_socket |
+   > | Output | Sends a list of messages to the client |
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Displays messages received from the server
-   - **Explanation:** Receives and displays messages from the server.
+---
 
-4. **`void addUserToContacts(int client_socket, char *userID)`**
+10. Function for sorting messages in a CSV file
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Adds a user to the contacts list
-   - **Explanation:** Takes user input for adding a contact, constructs a `Message` structure, and sends it to the server.
+    ```c 
+    void sortTheCSVFileAccordingToDate(char *messagesCSVPath)
+    ```
+    > This function sorts the messages in a CSV file based on their dates.
 
-5. **`void deleteUserFromContacts(int client_socket, char *userID)`**
+    > |  |  |
+    > | - | - |
+    > | Input | char *messagesCSVPath |
+    > | Output | None |
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Deletes a user from the contacts list
-   - **Explanation:** Takes user input for deleting a contact, constructs a `Message` structure, and sends it to the server.
+---
 
-6. **`void displayContacts(int client_socket, char *userID)`**
+11. Function for comparing two dates
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Displays the list of contacts
-   - **Explanation:** Requests and displays the list of contacts from the server.
+    ```c 
+    int compareDates(const Date *date1, const Date *date2)
+    ```
+    > This function compares two date structures and returns the result.
 
-7. **`void displayMessagesFromUser(int client_socket, char *userID)`**
+    > |  |  |
+    > | - | - |
+    > | Input | const Date *date1, const Date *date2 |
+    > | Output | Returns an integer (comparison result) |
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Displays messages from a specified user
-   - **Explanation:** Takes user input for a specified user, constructs a `Message` structure, sends it to the server, and displays the response.
+---
 
-8. **`void deleteMessageFromUser(int client_socket, char *userID)`**
+12. Function for creating CSV files if they don't exist
 
-   - **Inputs:** `int client_socket`, `char *userID`
-   - **Outputs:** Deletes a message from a specified user
-   - **Explanation:** Takes user input for a specified user and message, constructs a `Message` structure, sends it to the server, and displays the response.
+    ```c 
+    void createCSVIfNotExists(char *userID)
+    ```
+    > This function creates contacts and messages CSV files if they don't exist for the given user.
 
-9. **`void clearScreen()`**
+    > |  |  |
+    > | - | - |
+    > | Input | char *userID |
+    > | Output | None |
 
-   - **Inputs:** None
-   - **Outputs:** None
-   - **Explanation:** Clears the console screen.
+---
+
+</details>
+
+## client.c
+
+#### Function Prototypes and Explanations:
+
+<details><summary>See more</summary>
+1. Function for displaying the menu
+
+   ```c 
+   void displayMenu()
+   ```
+   > This function displays the menu options for the user.
+
+   > |  |  |
+   > | - | - |
+   > | Input | None |
+   > | Output | None |
+
+---
+
+2. Request function for sending a message to the server
+
+   ```c 
+   void sendMessageToServer(int client_socket, char *userID)
+   ```
+   > This function takes user input for sending a message, constructs a `Message` structure, and sends it to the server.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Sends a message to the server |
+
+---
+
+3. Request function for receiving messages from the server
+
+   ```c 
+   void receiveMessagesFromServer(int client_socket, char *userID)
+   ```
+   > This function receives and displays messages from the server.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Displays messages received from the server |
+
+---
+
+4. Request function for adding a user to the contacts list
+
+   ```c 
+   void addUserToContacts(int client_socket, char *userID)
+   ```
+   > This function takes user input for adding a contact, constructs a `Message` structure, and sends it to the server.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Adds a user to the contacts list |
+
+---
+
+5. Request function for deleting a user from the contacts list
+
+   ```c 
+   void deleteUserFromContacts(int client_socket, char *userID)
+   ```
+   > This function takes user input for deleting a contact, constructs a `Message` structure, and sends it to the server.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Deletes a user from the contacts list |
+
+---
+
+6. Request function for displaying the list of contacts
+
+   ```c 
+   void displayContacts(int client_socket, char *userID)
+   ```
+   > This function requests and displays the list of contacts from the server.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Displays the list of contacts |
+
+---
+
+7. Request function for displaying messages from a specified user
+
+   ```c 
+   void displayMessagesFromUser(int client_socket, char *userID)
+   ```
+   > This function takes user input for a specified user, constructs a `Message` structure, sends it to the server, and displays the response.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Displays messages from a specified user |
+
+---
+
+8. Request function for deleting a message from a specified user
+
+   ```c 
+   void deleteMessageFromUser(int client_socket, char *userID)
+   ```
+   > This function takes user input for a specified user and message, constructs a `Message` structure, sends it to the server, and displays the response.
+
+   > |  |  |
+   > | - | - |
+   > | Input | int client_socket, char *userID |
+   > | Output | Deletes a message from a specified user |
+
+---
+
+9. Function for clearing the console screen
+
+   ```c 
+   void clearScreen()
+   ```
+   > This function clears the console screen.
+
+   > |  |  |
+   > | - | - |
+   > | Input | None |
+   > | Output | None |
+
+---
+</details>
+
+## ansiTerminalColors.h
+
+#### Function Prototypes and Explanations:
+
+<details><summary>See more</summary>
+0. Macro function for printing colored text to the console
+
+   ```c 
+   // XXX is the color name
+   #define LogXXX(x) printf(ANSI_COLOR_XXX x ANSI_COLOR_RESET)
+   ```
+   > This function prints colored text to the console.
+
+   > |  |  |
+   > | - | - |
+   > | Input | char *text, char *color |
+   > | Output | None |
+
+---
+
+</details>
