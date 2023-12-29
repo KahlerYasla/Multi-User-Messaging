@@ -1,5 +1,6 @@
-# Multi_User_Messaging
-
+# Multi_User_Messaging 
+ Multithreaded Realtime Console Chat App 💬
+ 
 ![Featured Photo](./Public/Project%20ScreenShots/12.png)
 
 # Table of Contents:
@@ -19,47 +20,62 @@
 # Project Description:
 >Multi-threaded **`console`** chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
 
-#### Built With
-<details><summary>Built With</summary>
-</details>
+#### Built With:
+```diff
+Programming Languages:
++ C
 
-| Syntax | Description |
-| - | - |
-| Header | Title |
-| Paragraph | Text |
+Frameworks and Technologies:
+- No frameworks used (only standard libraries)
++ Only C standard libraries for Unix-like systems
++ Csv file system for storing messages and contacts
+   ```
 
 #### Libraries and Dependencies:
-- <stdio.h>
-- <stdlib.h>
-- <string.h>
-- <unistd.h>
-- <arpa/inet.h>
-- <pthread.h>
-- No external dependencies
+
+- Standart libraries Listed Only Important Ones:
+   - arpa/inet.h (for socket programming)
+   - unistd.h (for read and write functions)
+   - pthread.h (for multithreading)
+   - time.h (for date and time functions)
+   - sys/types.h (for socket programming)
+   - sys/stat.h (for file permissions)
+- External libraries:
+   - [ansiTerminalColors.h](./ansiTerminalColors.h) (written by me)
+- Dependencies:
+   - [gcc](https://gcc.gnu.org/) (GNU Compiler Collection)
 
 #### Compatible with:
-- Linux
-- MacOS
+```diff
++ Linux
++ MacOS
+- Windows (needs to include winsock.h instead of arpa/inet.h)
+```
 
 ---
 
 # Project Structure:
-Server Side 
-   - `server.c` file contains the source code for the server component.
-   - `Messages` folder contains the messagebox for each user.
-      - `userID.csv` files contain the messages for each user.
-   - `Contacts` folder contains the contacts list for each user.
-      - `userID.csv` files contain the contacts list for each user.
 
-Client Side
+```bash
+.
+├── Contacts
+│   ├── userID.csv // example
+│   └── ...
+├── Messages
+│   ├── userID.csv // example
+│   └── ...
+├── Public // this folder is not included in the project
+│   └── Project ScreenShots
+│       └── ...
+├── Readme.md
+├── ansiTerminalColors.h // for colored output
+├── client // executable of client component
+├── client.c // source code of client component
+├── server  // executable of server component
+└── server.c // source code of server component
 
-   - `client.c` file contains the source code for the client component.
-
-Root Folder
-- `ansiTerminalColors.h` is a header file contains ANSI escape sequences for colored terminal output.
-- `client and server` are the executables for the client and server components, respectively.
-- `Public` folder contains the project logo and screenshots.
-   - `Project ScreenShots` folder contains screenshots of the project.
+5 directories, 24 files
+```
 
 ---
 
@@ -92,6 +108,7 @@ Root Folder
 ![Screenshot 13](./Public/Project%20ScreenShots/12.png)
 ---
 ![Screenshot 14](./Public/Project%20ScreenShots/13.png)
+---
 
 # Code Documentation
 

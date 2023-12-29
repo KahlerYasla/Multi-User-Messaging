@@ -6,6 +6,8 @@
         "inet.h": "c",
         "stdlib.h": "c",
         "stdio.h": "c",
-        "ansiterminalcolors.h": "c"
+        "ansiterminalcolors.h": "c",
+        "types.h": "c",
+        "stat.h": "c"
     }
 }
