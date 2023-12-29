@@ -1,13 +1,96 @@
-<!-- Cover Page -->
 # Multi_User_Messaging
 
-![University Logo](./Public/Logo.png)
+![Project Logo](./Public/Logo.png)
 
-**STUDENT ID:** 21011603  
-**STUDENT NAME:** SELİN ÇIRAK  
-**STUDENT EMAIL:** selin.cirak@std.yildiz.edu.tr
+# Table of Contents:
+- [Project Description](#project-description)
+   - [Built With](#built-with)
+   - [Libraries and Libraries and Dependencies](#libraries-and-dependencies)
+   - [Compatible With](#compatible-with)
+- [Project Structure](#project-structure)
+- [Screenshots](#screenshots)
+- [Code Documentation](#code-documentation)
+  - [Server Component](#server-component)
+    - [Function Prototypes and Explanations](#function-prototypes-and-explanations)
+  - [Client Component](#client-component)
+    - [Function Prototypes and Explanations](#function-prototypes-and-explanations-1)
 
 ---
+# Project Description:
+Multi-threaded chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
+
+#### Built with:
+- C
+- Socket Programming
+- Multi-threading
+- CSV Files
+
+#### Libraries and Dependencies:
+- <stdio.h>
+- <stdlib.h>
+- <string.h>
+- <unistd.h>
+- <arpa/inet.h>
+- <pthread.h>
+- No external dependencies
+
+#### Compatible with:
+- Linux
+- MacOS
+
+---
+
+# Project Structure:
+Server Side 
+   - `server.c` file contains the source code for the server component.
+   - `Messages` folder contains the messagebox for each user.
+      - `userID.csv` files contain the messages for each user.
+   - `Contacts` folder contains the contacts list for each user.
+      - `userID.csv` files contain the contacts list for each user.
+
+Client Side
+
+   - `client.c` file contains the source code for the client component.
+
+Root Folder
+- `ansiTerminalColors.h` is a header file contains ANSI escape sequences for colored terminal output.
+- `client and server` are the executables for the client and server components, respectively.
+- `Public` folder contains the project logo and screenshots.
+   - `Project ScreenShots` folder contains screenshots of the project.
+
+---
+
+# Screenshots:
+
+![Screenshot 1](./Public/Project%20ScreenShots/0.png)
+---
+![Screenshot 2](./Public/Project%20ScreenShots/1.png)
+---
+![Screenshot 3](./Public/Project%20ScreenShots/2.png)
+---
+![Screenshot 4](./Public/Project%20ScreenShots/3.png)
+---
+![Screenshot 5](./Public/Project%20ScreenShots/4.png)
+---
+![Screenshot 6](./Public/Project%20ScreenShots/5.png)
+---
+![Screenshot 7](./Public/Project%20ScreenShots/6.png)
+---
+![Screenshot 8](./Public/Project%20ScreenShots/7.png)
+---
+![Screenshot 9](./Public/Project%20ScreenShots/8.png)
+---
+![Screenshot 10](./Public/Project%20ScreenShots/9.png)
+---
+![Screenshot 11](./Public/Project%20ScreenShots/10.png)
+---
+![Screenshot 12](./Public/Project%20ScreenShots/11.png)
+---
+![Screenshot 13](./Public/Project%20ScreenShots/12.png)
+---
+![Screenshot 14](./Public/Project%20ScreenShots/13.png)
+
+# Code Documentation
 
 ## Server Component:
 
@@ -142,20 +225,3 @@
    - **Inputs:** None
    - **Outputs:** None
    - **Explanation:** Clears the console screen.
-
-### Screenshots:
-
-![Screenshot 1](./Public/Project%20ScreenShots/0.png)
-![Screenshot 2](./Public/Project%20ScreenShots/1.png)
-![Screenshot 3](./Public/Project%20ScreenShots/2.png)
-![Screenshot 4](./Public/Project%20ScreenShots/3.png)
-![Screenshot 5](./Public/Project%20ScreenShots/4.png)
-![Screenshot 6](./Public/Project%20ScreenShots/5.png)
-![Screenshot 7](./Public/Project%20ScreenShots/6.png)
-![Screenshot 8](./Public/Project%20ScreenShots/7.png)
-![Screenshot 9](./Public/Project%20ScreenShots/8.png)
-![Screenshot 10](./Public/Project%20ScreenShots/9.png)
-![Screenshot 11](./Public/Project%20ScreenShots/10.png)
-![Screenshot 12](./Public/Project%20ScreenShots/11.png)
-![Screenshot 13](./Public/Project%20ScreenShots/12.png)
-![Screenshot 14](./Public/Project%20ScreenShots/13.png)
