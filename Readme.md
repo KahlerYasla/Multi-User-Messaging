@@ -1,4 +1,13 @@
+<!-- Cover Page -->
 # Multi_User_Messaging
+
+![University Logo](./Public/Logo.png)
+
+**STUDENT ID:** 21011603  
+**STUDENT NAME:** SELİN ÇIRAK  
+**STUDENT EMAIL:** selin.cirak@std.yildiz.edu.tr
+
+---
 
 ## Server Component:
 
