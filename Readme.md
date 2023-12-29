@@ -6,9 +6,11 @@
 # Table of Contents:
 - [Project Description](#project-description)
    - [Built With](#built-with)
-   - [Libraries and Libraries and Dependencies](#libraries-and-dependencies)
+   - [Libraries and Dependencies](#libraries-and-dependencies)
    - [Compatible With](#compatible-with)
+- [Usage](#usage)
 - [Project Structure](#project-structure)
+- [Future Improvements](#future-improvements)
 - [Screenshots](#screenshots)
 - [Code Documentation](#code-documentation)
   - [Server Component](#server-component)
@@ -54,6 +56,11 @@ Frameworks and Technologies:
 
 ---
 
+# Usage:
+It is well described with screenshots in [Screenshots](#screenshots) section.
+
+---
+
 # Project Structure:
 
 ```html
@@ -75,6 +82,14 @@ Frameworks and Technologies:
 └── server.c // source code of server component
 
 5 directories, 24 files
+```
+
+---
+
+# Future Improvements:
+```diff
++ Add a proper database instead of CSV files (maybe SQLite or PostgreSQL)
++ Add a decent GUI (maybe with Qt)
 ```
 
 ---
