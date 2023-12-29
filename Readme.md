@@ -67,7 +67,7 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 
 # Project Structure:
 
-```console
+```c
 .
 ├── Contacts
 │   ├── userID.csv // example
