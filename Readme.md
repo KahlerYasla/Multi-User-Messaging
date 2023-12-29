@@ -1,6 +1,6 @@
 # Multi_User_Messaging
 
-![Project Logo](./Public/Logo.png)
+![Featured Photo](./Public/Project%20ScreenShots/12.png)
 
 # Table of Contents:
 - [Project Description](#project-description)
@@ -17,13 +17,16 @@
 
 ---
 # Project Description:
-Multi-threaded chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
+>Multi-threaded **`console`** chat application implemented in C, consisting of both server and client components. The server manages user contacts and messages, while the client provides a user-friendly interface to interact with the server. The communication between the server and client is facilitated through socket programming.
 
-#### Built with:
-- C
-- Socket Programming
-- Multi-threading
-- CSV Files
+#### Built With
+<details><summary>Built With</summary>
+</details>
+
+| Syntax | Description |
+| - | - |
+| Header | Title |
+| Paragraph | Text |
 
 #### Libraries and Dependencies:
 - <stdio.h>
@@ -96,17 +99,34 @@ Root Folder
 
 ### Function Prototypes and Explanations:
 
-1. **`void *handle_client_messages(void *arg)`**
+---
+1. handler function for each client thread
 
-   - **Inputs:** `void *arg` (client socket)
-   - **Outputs:** None
-   - **Explanation:** This function runs in a separate thread for each connected client. It handles incoming messages from the client, interprets user input, and performs corresponding actions.
+   ```c 
+   void *handleClient(void *arg)
+   ```
+   > This function runs in a separate thread for each connected client. It handles incoming messages from the client, interprets user input, and performs corresponding actions.
 
-2. **`void getCurrentDateAndTime(Date *date)`**
+   > |  |  |
+   > | - | - |
+   > | Input | void *arg (client socket) |
+   > | Output | None |
 
-   - **Inputs:** `Date *date` (a structure for holding date and time information)
-   - **Outputs:** None
-   - **Explanation:** Retrieves the current date and time and stores it in the provided `Date` structure.
+---
+
+2. Getter function for the current date and time
+
+   ```c 
+   Date getCurrentDateAndTime()
+   ```
+   > This function retrieves the current date and time and returns it as a `Date` structure.
+
+   > |  |  |
+   > | - | - |
+   > | Input | None |
+   > | Output | Date (structure) |
+
+---
 
 3. **`void listContacts(char *userID, int client_socket)`**
 
