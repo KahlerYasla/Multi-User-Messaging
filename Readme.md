@@ -11,6 +11,7 @@
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Future Improvements](#future-improvements)
+- [To be Fixed](#to-be-fixed)
 - [Screenshots](#screenshots)
 - [Code Documentation](#code-documentation)
   - [server.c](#serverc)
@@ -95,6 +96,17 @@ It is well described with screenshots in [Screenshots](#screenshots) section.
 + Add a proper database instead of CSV files (maybe SQLite or PostgreSQL)
 
 + Add a decent GUI (maybe with Qt)
+
++ Listing from a specified user (in messages)
+```
+
+# To be Fixed:
+```diff
+- Bug: server crash when a client disconnects
+
+- Bug: deleting a message from a user deletes all messages from that user
+
+- Bug: returning to the main menu after deleting a message from a user returns to the same menu
 ```
 
 ---
